@@ -80,4 +80,6 @@ input-ipc-server=mpvsocket
 *   **PowerShell 窗口闪烁**：这是正常现象，脚本已配置为隐藏模式运行，窗口会瞬间消失。
 
 ---
+* [mpv.io](https://mpv.io/)
+* [https://github.com/shinchiro/mpv-winbuild-cmake/releases](https://github.com/shinchiro/mpv-winbuild-cmake/releases)  
 *Created for personal use, shared for the community.*
