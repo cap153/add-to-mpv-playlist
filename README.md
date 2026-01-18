@@ -41,7 +41,7 @@ input-ipc-server=mpvsocket
 ---
 
 # <a id="中文指南"></a>中文指南
-# MPV 右键添加播放列表工具
+# Windows系统鼠标右键添加到 MPV 播放列表
 
 这是一个轻量级的脚本工具，用于在 Windows 右键菜单中添加 **"Add to mpv playlist"**（添加到 MPV 播放列表）选项。
 
