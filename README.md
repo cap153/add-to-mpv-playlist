@@ -81,5 +81,6 @@ input-ipc-server=mpvsocket
 
 ---
 * [mpv.io](https://mpv.io/)
-* [https://github.com/shinchiro/mpv-winbuild-cmake/releases](https://github.com/shinchiro/mpv-winbuild-cmake/releases)  
+* [https://github.com/shinchiro/mpv-winbuild-cmake/releases](https://github.com/shinchiro/mpv-winbuild-cmake/releases)
+---
 *Created for personal use, shared for the community.*
