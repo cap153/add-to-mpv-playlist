@@ -1,74 +1,74 @@
-# --- ÅäÖÃÇø ---
+# --- é…ç½®åŒº ---
 $scriptPath = $MyInvocation.MyCommand.Path
 $currentDir = Split-Path $scriptPath
-# ¼ÙÉè mpv.exe ºÍ½Å±¾ÔÚÍ¬Ò»Ä¿Â¼£¬»òÕßÄã¿ÉÒÔÊÖ¶¯Ö¸¶¨¾ø¶ÔÂ·¾¶
+# å‡è®¾ mpv.exe å’Œè„šæœ¬åœ¨åŒä¸€ç›®å½•ï¼Œæˆ–è€…ä½ å¯ä»¥æ‰‹åŠ¨æŒ‡å®šç»å¯¹è·¯å¾„
 $mpvPath = Join-Path $currentDir "mpv.exe" 
 
 $pipeShortName = "mpvsocket"
 $pipeFullPath = "\\.\pipe\$pipeShortName"
 $logFile = "$env:TEMP\mpv-debug.log"
-# --- ÅäÖÃ½áÊø ---
+# --- é…ç½®ç»“æŸ ---
 
 function Write-Log {
     param($Message)
     $line = "[$(Get-Date -Format 'HH:mm:ss')] $Message"
-    # Ê¹ÓÃ UTF8 ·ÀÖ¹ÈÕÖ¾ÂÒÂë
+    # ä½¿ç”¨ UTF8 é˜²æ­¢æ—¥å¿—ä¹±ç 
     Add-Content -Path $logFile -Value $line -Encoding UTF8
 }
 
 try {
-    # »ñÈ¡´«ÈëµÄÎÄ¼şÂ·¾¶
+    # è·å–ä¼ å…¥çš„æ–‡ä»¶è·¯å¾„
     $filePath = $args[0]
     
-    # ¼òµ¥µÄ·Ç¿Õ¼ì²é
+    # ç®€å•çš„éç©ºæ£€æŸ¥
     if (-not $filePath) { return }
 
-    Write-Log "½Å±¾Æô¶¯¡£´¦ÀíÎÄ¼ş: $filePath"
+    Write-Log "è„šæœ¬å¯åŠ¨ã€‚å¤„ç†æ–‡ä»¶: $filePath"
 
-    # 1. ¼ì²é MPV ¹ÜµÀÊÇ·ñ´æÔÚ
+    # 1. æ£€æŸ¥ MPV ç®¡é“æ˜¯å¦å­˜åœ¨
     if (Test-Path $pipeFullPath) {
-        Write-Log "¼ì²âµ½¹ÜµÀ´æÔÚ£¬×¼±¸×·¼Ó²¥·Å..."
+        Write-Log "æ£€æµ‹åˆ°ç®¡é“å­˜åœ¨ï¼Œå‡†å¤‡è¿½åŠ æ’­æ”¾..."
 
-        # 2. Éú³É JSON
-        # loadfile Ö§³Ö×·¼ÓÄ£Ê½£¬ÄÜ¹»´¦Àí²¥·ÅÁĞ±í
+        # 2. ç”Ÿæˆ JSON
+        # loadfile æ”¯æŒè¿½åŠ æ¨¡å¼ï¼Œèƒ½å¤Ÿå¤„ç†æ’­æ”¾åˆ—è¡¨
         $payloadObj = @{ 
             command = @("loadfile", $filePath, "append-play") 
         }
-        # Compress Ñ¹Ëõ³Éµ¥ĞĞ£¬Depth ·ÀÖ¹¶ÔÏó²ã¼¶¹ıÉî³öÎÊÌâ
+        # Compress å‹ç¼©æˆå•è¡Œï¼ŒDepth é˜²æ­¢å¯¹è±¡å±‚çº§è¿‡æ·±å‡ºé—®é¢˜
         $jsonPayload = $payloadObj | ConvertTo-Json -Compress -Depth 2
 
-        Write-Log "Ö¸ÁîÄÚÈİ: $jsonPayload"
+        Write-Log "æŒ‡ä»¤å†…å®¹: $jsonPayload"
 
-        # 3. Á¬½Ó¹ÜµÀ
+        # 3. è¿æ¥ç®¡é“
         $pipeClient = New-Object System.IO.Pipes.NamedPipeClientStream(".", $pipeShortName, [System.IO.Pipes.PipeDirection]::Out)
         try {
-            $pipeClient.Connect(500) # 500ms Á¬½Ó³¬Ê±¼´¿É£¬ÎŞĞèÌ«¾Ã
+            $pipeClient.Connect(500) # 500ms è¿æ¥è¶…æ—¶å³å¯ï¼Œæ— éœ€å¤ªä¹…
         } catch {
-            Write-Log "Á¬½Ó¹ÜµÀÊ§°Ü£¬³¢ÊÔÖ±½ÓÆô¶¯ĞÂ½ø³Ì..."
-            # Èç¹ûÁ¬½ÓÊ§°Ü£¨½©Ê¬¹ÜµÀ£©£¬Ôò»ØÂäµ½Æô¶¯ĞÂ½ø³Ì
+            Write-Log "è¿æ¥ç®¡é“å¤±è´¥ï¼Œå°è¯•ç›´æ¥å¯åŠ¨æ–°è¿›ç¨‹..."
+            # å¦‚æœè¿æ¥å¤±è´¥ï¼ˆåƒµå°¸ç®¡é“ï¼‰ï¼Œåˆ™å›è½åˆ°å¯åŠ¨æ–°è¿›ç¨‹
             Start-Process -FilePath $mpvPath -ArgumentList "--input-ipc-server=$pipeShortName", """$filePath"""
             return
         }
 
-        # 4. ·¢ËÍ UTF-8 ×Ö½ÚÁ÷
+        # 4. å‘é€ UTF-8 å­—èŠ‚æµ
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonPayload + "`n")
         $pipeClient.Write($bytes, 0, $bytes.Length)
         $pipeClient.Flush()
         
         $pipeClient.Dispose()
-        Write-Log "Ö¸ÁîÒÑ·¢ËÍ¡£"
+        Write-Log "æŒ‡ä»¤å·²å‘é€ã€‚"
 
     } else {
-        Write-Log "MPV Î´ÔËĞĞ£¬Æô¶¯ĞÂÊµÀı..."
-        # Ç¿ÖÆÖ¸¶¨ ipc-server£¬È·±£Õâ´ÎÆô¶¯µÄÊµÀıÄÜ±»ÏÂÒ»´ÎÓÒ¼ü²Ëµ¥ÀûÓÃ
-        # Ê¹ÓÃ LiteralPath Ë¼Ïë´«µİ²ÎÊı±È½ÏÀ§ÄÑ£¬ÕâÀïÓÃÈıÒıºÅ°ü¹üÂ·¾¶´¦Àí¿Õ¸ñ
-        Start-Process -FilePath $mpvPath -ArgumentList "--input-ipc-server=$pipeShortName", """$filePath"""
+        Write-Log "MPV æœªè¿è¡Œï¼Œå¯åŠ¨æ–°å®ä¾‹..."
+        # å¼ºåˆ¶æŒ‡å®š ipc-serverï¼Œç¡®ä¿è¿™æ¬¡å¯åŠ¨çš„å®ä¾‹èƒ½è¢«ä¸‹ä¸€æ¬¡å³é”®èœå•åˆ©ç”¨
+        # ä½¿ç”¨ LiteralPath æ€æƒ³ä¼ é€’å‚æ•°æ¯”è¾ƒå›°éš¾ï¼Œè¿™é‡Œç”¨ä¸‰å¼•å·åŒ…è£¹è·¯å¾„å¤„ç†ç©ºæ ¼
+        Start-Process -FilePath $mpvPath -ArgumentList "--input-ipc-server=$pipeFullPath", """$filePath"""
     }
 
 } catch {
     $errMsg = $_.Exception.Message
     Write-Log "[ERROR] $errMsg"
-    # Èç¹û±ØĞëµ¯´°±¨´í£¬Ê¹ÓÃ¸üÇáÁ¿µÄ COM ¶ÔÏó
+    # å¦‚æœå¿…é¡»å¼¹çª—æŠ¥é”™ï¼Œä½¿ç”¨æ›´è½»é‡çš„ COM å¯¹è±¡
     # $wshell = New-Object -ComObject Wscript.Shell
     # $wshell.Popup("MPV Add Error: $errMsg", 0, "Error", 16)
 }
